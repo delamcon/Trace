@@ -498,7 +498,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
         x = (desktop.width() - self.width()) // 2
         y = (desktop.height() - self.height()) // 2
         self.move(x, y)
-        # changes
 
 
 if __name__ == "__main__":
