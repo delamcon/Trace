@@ -159,7 +159,7 @@ class AllWindows(QtWidgets.QWidget):
         self.targetMainLabel.setText(_translate("MainWindow",
                                                 "Целевая аудитория"))
         self.targetInputButton.setText(_translate("MainWindow", "Ввести"))
-        self.checkBox.setText(_translate("MainWindow", "Вывести имена и id "
-                                                       "(занимает много "
+        self.checkBox.setText(_translate("MainWindow", "Вывести имена, id и "
+                                                       "город (занимает много "
                                                        "времени)"))
         self.pushButton.setText(_translate("MainWindow", "Вывести в файл"))

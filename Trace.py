@@ -86,8 +86,8 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
         self.pushButton.clicked.connect(self.targetFile)
 
         self.targetInputButton.clicked.connect(self.targetInput)
-        self.mutualInputButton.clicked.connect(
-            self.mutualInput)  # вызывается после нажатия кнопки Далее
+        self.mutualInputButton.clicked.connect(self.mutualInput)
+        # вызывается после нажатия кнопки Далее
         self.targetNextButton.clicked.connect(self.targetDo)
         self.listWidgetFill = []
         self.listWidgetFill2 = []
@@ -381,13 +381,14 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                             selPeople.append(int(y[0]))
                         if int(i) in selPeople:
                             setPeople = cur.execute('''SELECT first_name, 
-                                last_name, id_vk 
+                                last_name, id_vk, city 
                                 FROM people_data WHERE id_vk = ?''',
                                 (int(i),)).fetchall()[0]
                             print(setPeople)
                             self.targetForFile.append(setPeople[2])
                             self.targetListWidget.addItem(f'{setPeople[0]} '
-                                f'{setPeople[1]}    {setPeople[2]}')
+                                f'{setPeople[1]}    {setPeople[2]}    '
+                                f'{setPeople[3]}')
                         else:
                             peopleInf = f"{head}users.get?user_ids={int(i)}"\
                                 f"&fields=city&lang=0&access_token=" \
@@ -413,7 +414,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                                 if 'city' in peopleInf:
                                     profCity = peopleInf['city']['title']
                                 else:
-                                    profCity = 'Null'
+                                    profCity = ''
                                 for k in result['response']['items']:
                                     profFrnds.append(f"{str(k['id'])}")
                                 profFrnds = ', '.join(profFrnds)
@@ -426,7 +427,8 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                                 self.targetForFile.append(i)
                                 self.targetListWidget.addItem(
                                     f'{peopleInf["first_name"]} '
-                                    f'{peopleInf["last_name"]}    {i}')
+                                    f'{peopleInf["last_name"]}    {i}'
+                                    f'{profCity}')
 
     def targetFile(self):  #  записывает данные "Целевой аудитории" в файл
         print(self.targetForFile)
