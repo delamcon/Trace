@@ -125,7 +125,8 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                 dbIn = []
                 for g in res:
                     dbIn.append(str(g[0]))
-                if str(idIn) not in dbIn:
+                if str(idIn) not in dbIn:  # проверяем человека в БД
+                    # если данных о человеке нет, они заполняются
                     profName = infRes['first_name']
                     profSur = infRes['last_name']
                     profId = infRes['id']
@@ -157,8 +158,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                 AllCities = dict()
                 head = 'https://api.vk.com/method/'
                 for i in friendsdb:  # перечисляем друзей человека
-                    if int(
-                            i) in normRes:
+                    if int(i) in normRes:
                         # проверяем есть ли человек в базе данных
                         tmpRes = cur.execute('''SELECT first_name, last_name, 
                                      city FROM people_data WHERE id_vk = ?''',
@@ -170,7 +170,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                                 AllCities[tmpRes[2]] = 1
                             else:
                                 AllCities[tmpRes[2]] += 1
-                    else:
+                    else:  # если человека нет, его данные тоже заполняются
                         finf = f"{head}users.get?user_ids={i}&fields=city" \
                                f"&lang=0&access_token={self.api_key}&v=5.124"
                         fres = requests.get(finf).json()['response']
@@ -228,7 +228,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                         listIn = f"{i[0]} {i[1]}      {i[2]}"
                         self.mutualListWidget.addItem(listIn)
 
-    def idCheck(self):
+    def idCheck(self):  # метод проверки корректности введеной ссылки
         url = self.mutualLineEdit.text()
         if 'https://vk.com/' in url:
             self.CheckedId = url[15:]  # извлекаем из ссылки только id
@@ -274,7 +274,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                       defaultButton=QtWidgets.QMessageBox.Close)
             return False
 
-    def targetInput(self):
+    def targetInput(self):  # метод загрузки подписчиков группы в БД
         if self.targetCheck():
             url = self.targetLineEdit.text().rstrip().lstrip()
             self.targetLineEdit.setReadOnly(1)
@@ -284,9 +284,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
             groupCheck = f"{head}utils.resolveScreenName?" \
                          f"screen_name={сheckedId}&lang=0" \
                          f"&access_token={self.api_key}&v=5.124"
-            print(groupCheck)
             groupCheck = requests.get(groupCheck).json()['response']
-            print(groupCheck)
             idCheck = f"{head}groups.getMembers?group_id={сheckedId}" \
                       f"&offset=0&count=1000&lang=0" \
                       f"&access_token={self.api_key}&v=5.124"
@@ -298,6 +296,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                 normAllCom = []
                 for i in allCom:
                     normAllCom.append(i[0])
+                # проверяем есть группа в БД
                 if int(groupCheck['object_id']) not in normAllCom:
                     if idCheck['count'] > 1000:
                         peopleForDB = []
@@ -315,7 +314,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                         cur.execute('''INSERT INTO communities(group_id, 
                             people_id) VALUES(?, ?)''',
                             (groupCheck['object_id'], peopleForDB))
-                    else:
+                    else:  # если нет, заносим данные о группе в БД
                         peopleForDB = []
                         peopleGet = f"{head}groups.getMembers?" \
                             f"group_id={сheckedId}&offset=0&count=1000" \
@@ -333,20 +332,21 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                 self.listWidgetFill.append(groupCheck['object_id'])
                 print(self.listWidgetFill)
 
-    def targetCheckB(self):
+    def targetCheckB(self):  # проверяем нужно ли выводить имена людей
+        # во вкладке целевая аудитория
         if self.checkFlag:
             self.checkFlag = False
         else:
             self.checkFlag = True
 
-    def targetDo(self):
+    def targetDo(self):  # находит людей подписанные на веденные группы
         self.targetLineEdit.setReadOnly(1)
-        if len(self.listWidgetFill) <= 1:
+        if len(self.listWidgetFill) <= 1:  # ошибка, мало групп введено
             QtWidgets.QMessageBox.information(None, "Мало сообществ",
                       "Введите, как минимум, 2 сообщества",
                       buttons=QtWidgets.QMessageBox.Close,
                       defaultButton=QtWidgets.QMessageBox.Close)
-        else:
+        else:  # если введено достаточно групп, начинаем сравнивать подписки
             with sqlite3.connect("Trace.db") as con:
                 cur = con.cursor()
                 allPeople = []
@@ -355,12 +355,12 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                 for i in self.listWidgetFill:
                     peopleFromCom = cur.execute(
                         'SELECT people_id FROM communities WHERE group_id = ?',
-                        (int(i),)).fetchall()[0][0]
+                        (int(i),)).fetchall()[0][0]  # получаем подписчиков
                     peoples = peopleFromCom.split(',')
                     peoples = set(peoples)
                     allPeople.append(peoples)
                 p = allPeople[0]
-                for i in range(len(allPeople) - 1):
+                for i in range(len(allPeople) - 1):  # пересечения множеств
                     crossing = p.intersection(allPeople[i + 1])
                     p = crossing
                 self.targetListWidget.clear()
@@ -368,11 +368,11 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                 p = list(p)
                 print(p)
                 print(len(p))
-                if not self.checkFlag:
+                if not self.checkFlag:  # если не нужно выводить имена:
                     for i in p:
                         self.targetForFile.append(i)
                         self.targetListWidget.addItem(f'{i}')
-                else:
+                else:  # в ином случае, получаем данные о людях и выводим
                     for i in p:
                         selPeopleS = cur.execute(
                             'SELECT id_vk FROM people_data').fetchall()
@@ -428,13 +428,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                                     f'{peopleInf["first_name"]} '
                                     f'{peopleInf["last_name"]}    {i}')
 
-    def checkBoxCheck(self, state):
-        if state == Qt.Checked:
-            return True
-        else:
-            return False
-
-    def targetFile(self):
+    def targetFile(self):  #  записывает данные "Целевой аудитории" в файл
         print(self.targetForFile)
         if len(self.targetForFile) != 0:
             with open('ЦелеваяАудитория', 'w') as f:
@@ -445,7 +439,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                       buttons=QtWidgets.QMessageBox.Close,
                       defaultButton=QtWidgets.QMessageBox.Close)
 
-    def targetBack(self):
+    def targetBack(self):  # при нажатии кнопки "меню" очищает переменные
         self.listWidgetFill = []
         self.listWidgetFill2 = []
         self.checkFlag = False
@@ -456,7 +450,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
         self.targetListWidget.clear()
         self.stackedWidget.setCurrentIndex(0)
 
-    def targetCheck(self):
+    def targetCheck(self):  # проверка на корректность ссылки
         url = self.targetLineEdit.text()
         if 'https://vk.com/' in url:
             сheckedId = url.rstrip().lstrip()[15:]
@@ -485,7 +479,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                       buttons=QtWidgets.QMessageBox.Close,
                       defaultButton=QtWidgets.QMessageBox.Close)
 
-    def backButton(self):
+    def backButton(self):  # при нажатии кнопки "меню" очищает переменные
         self.mutualLineEdit.setText('')
         self.mutualNameLabel.setText('')
         self.mutualListWidget.clear()
@@ -493,7 +487,7 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
         self.stackedWidget.setCurrentIndex(0)
         friendsForList = []
 
-    def center(self):
+    def center(self):  # метод выводит окно по центру
         desktop = QtWidgets.QApplication.desktop()
         x = (desktop.width() - self.width()) // 2
         y = (desktop.height() - self.height()) // 2
