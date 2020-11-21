@@ -213,7 +213,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                         f'Предположительный город не определен')
                 else:
                     x = [i for i, ltr in enumerate(cc) if ltr == max(cc)]
-                    print(AllCities)
                     x = [c[i] for i in x]
                     if len(x) == 1:
                         self.mutualListWidget.addItem(
@@ -238,7 +237,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
             url = f"{head}users.get?user_ids={id}&fields=bdate" \
                   f"&access_token={self.api_key}&v=5.124"
             profile = requests.get(url).json()
-            print(profile)
             if 'error' in profile:  # проверяем на ошибки
                 QtWidgets.QMessageBox.information(None, "Аккаунт закрыт",
                           "Введите другой аккаунт",
@@ -274,12 +272,11 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                       defaultButton=QtWidgets.QMessageBox.Close)
             return False
 
-    def targetInput(self):  # метод загрузки подписчиков группы в БД
+    def targetInput(self):    # метод загрузки подписчиков группы в БД
         if self.targetCheck():
             url = self.targetLineEdit.text().rstrip().lstrip()
             self.targetLineEdit.setReadOnly(1)
             сheckedId = url.rstrip().lstrip()[15:]
-            print(сheckedId)
             head = "https://api.vk.com/method/"
             groupCheck = f"{head}utils.resolveScreenName?" \
                          f"screen_name={сheckedId}&lang=0" \
@@ -307,7 +304,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                                 f"access_token={self.api_key}&v=5.124"
                             peopleGet = requests.get(peopleGet).json()[
                                 'response']
-                            print(peopleGet)
                             for i in peopleGet['items']:
                                 peopleForDB.append(str(i))
                         peopleForDB = ','.join(peopleForDB)
@@ -330,7 +326,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                 self.targetListWidget.addItem(f"{url}")
                 self.targetLineEdit.setText('')
                 self.listWidgetFill.append(groupCheck['object_id'])
-                print(self.listWidgetFill)
 
     def targetCheckB(self):  # проверяем нужно ли выводить имена людей
         # во вкладке целевая аудитория
@@ -366,8 +361,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                 self.targetListWidget.clear()
                 self.targetListWidget.addItem('----- Общие подписчики -----')
                 p = list(p)
-                print(p)
-                print(len(p))
                 if not self.checkFlag:  # если не нужно выводить имена:
                     for i in p:
                         self.targetForFile.append(i)
@@ -384,7 +377,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                                 last_name, id_vk, city 
                                 FROM people_data WHERE id_vk = ?''',
                                 (int(i),)).fetchall()[0]
-                            print(setPeople)
                             self.targetForFile.append(setPeople[2])
                             self.targetListWidget.addItem(f'{setPeople[0]} '
                                 f'{setPeople[1]}    {setPeople[2]}    '
@@ -399,13 +391,11 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                                       f"&fields=city&lang=0" \
                                       f"&access_token={self.api_key}&v=5.124"
                             result = requests.get(friends).json()
-                            print(result)
                             TestErr = 'error' not in peopleInf and \
                                       peopleInf['first_name'] != 'DELETED' \
                                       and 'deactivated' not in peopleInf and \
                                       not peopleInf['is_closed']
                             if TestErr:
-                                print(peopleInf)
                                 profName = peopleInf['first_name']
                                 profSur = peopleInf['last_name']
                                 profId = peopleInf['id']
@@ -431,7 +421,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
                                     f'{profCity}')
 
     def targetFile(self):  #  записывает данные "Целевой аудитории" в файл
-        print(self.targetForFile)
         if len(self.targetForFile) != 0:
             with open('ЦелеваяАудитория', 'w') as f:
                 for i in self.targetForFile:
@@ -456,7 +445,6 @@ class Window(QMainWindow, AllWindows):  # класс окна главного �
         url = self.targetLineEdit.text()
         if 'https://vk.com/' in url:
             сheckedId = url.rstrip().lstrip()[15:]
-            print(сheckedId)
             head = "https://api.vk.com/method/"
             idCheck = f"{head}utils.resolveScreenName?screen_name=" \
                       f"{сheckedId}&lang=0&access_token={self.api_key}&v=5.124"

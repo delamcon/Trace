@@ -104,7 +104,7 @@ class AllWindows(QtWidgets.QWidget):
         self.targetListWidget.setGeometry(QtCore.QRect(20, 130, 701, 192))
         self.targetListWidget.setObjectName("targetListWidget")
         self.targetMainLabel = QtWidgets.QLabel(self.page2)
-        self.targetMainLabel.setGeometry(QtCore.QRect(300, 20, 131, 31))
+        self.targetMainLabel.setGeometry(QtCore.QRect(300, 20, 141, 31))
         self.targetMainLabel.setObjectName("targetMainLabel")
         self.targetInputButton = QtWidgets.QPushButton(self.page2)
         self.targetInputButton.setGeometry(QtCore.QRect(630, 90, 90, 25))
